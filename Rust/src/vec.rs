@@ -162,11 +162,11 @@ impl Vec3 {
     }
 }
 
-pub fn write_color(color: Vec3) {
+pub fn write_color(color: Vec3, samples_per_pixel: u64) {
     println!("{} {} {}",
-             (255.999 * color.x) as u64,
-             (255.999 * color.y) as u64,
-             (255.999 * color.z) as u64
+             (256.0 * (color.x / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u64,
+             (256.0 * (color.y / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u64,
+             (256.0 * (color.z / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u64
     )
 }
 
