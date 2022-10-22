@@ -1,4 +1,5 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
+use rand::Rng;
 
 #[derive(Copy, Clone)]
 pub struct Vec3 {
@@ -160,13 +161,47 @@ impl Vec3 {
     pub fn unit_vector(self) -> Vec3 {
         self / self.length()
     }
+
+    pub fn random(min: f64, max: f64) -> Vec3 {
+        let mut rng = rand::thread_rng();
+
+        Vec3 {
+            x: rng.gen_range(min..max),
+            y: rng.gen_range(min..max),
+            z: rng.gen_range(min..max),
+        }
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        loop {
+            let p = Vec3::random(-1.0, 1.0);
+            if p.length_squared() >= 1.0 {
+                continue;
+            }
+
+            return p;
+        }
+    }
+
+    pub fn random_unit_vector() -> Vec3 {
+        Vec3::random_in_unit_sphere().unit_vector()
+    }
+
+    pub fn random_in_hemisphere(normal: Vec3) -> Vec3 {
+        let in_unit_sphere: Vec3 = Vec3::random_in_unit_sphere();
+        if Vec3::dot(in_unit_sphere, normal) > 0.0 {
+            in_unit_sphere
+        } else {
+            -in_unit_sphere
+        }
+    }
 }
 
 pub fn write_color(color: Vec3, samples_per_pixel: u64) {
     println!("{} {} {}",
-             (256.0 * (color.x / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u64,
-             (256.0 * (color.y / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u64,
-             (256.0 * (color.z / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u64
+             (256.0 * (color.x / (samples_per_pixel as f64)).sqrt().clamp(0.0, 0.999)) as u64,
+             (256.0 * (color.y / (samples_per_pixel as f64)).sqrt().clamp(0.0, 0.999)) as u64,
+             (256.0 * (color.z / (samples_per_pixel as f64)).sqrt().clamp(0.0, 0.999)) as u64
     )
 }
 
