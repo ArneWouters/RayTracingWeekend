@@ -10,3 +10,4 @@ cargo run --release > image.ppm
 ```
 
 # Final Scene
+![final scene Rust](/Rust/images/image21.png)
