@@ -42,12 +42,12 @@ impl Metal {
         if f < 1.0 {
             Metal {
                 albedo: a,
-                fuzz: 1.0
+                fuzz: f
             }
         } else {
             Metal {
                 albedo: a,
-                fuzz: f
+                fuzz: 1.0
             }
         }
     }
