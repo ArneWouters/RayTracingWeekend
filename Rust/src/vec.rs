@@ -53,6 +53,18 @@ impl DivAssign<f64> for Vec3 {
     }
 }
 
+impl Mul for Vec3 {
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+        Vec3 {
+            x: self.x * other.x,
+            y: self.y * other.y,
+            z: self.z * other.z
+        }
+    }
+}
+
 impl Mul<Vec3> for f64 {
     type Output = Vec3;
 
@@ -194,6 +206,16 @@ impl Vec3 {
         } else {
             -in_unit_sphere
         }
+    }
+
+    pub fn near_zero(self) -> bool {
+        const EPS: f64 = 1.0e-8;
+
+        (self.x().abs() < EPS) && (self.y().abs() < EPS) && (self.z().abs() < EPS)
+    }
+
+    pub fn reflect(a: Vec3, b: Vec3) -> Vec3 {
+        a - (2.0 * Vec3::dot(a, b) * b)
     }
 }
 

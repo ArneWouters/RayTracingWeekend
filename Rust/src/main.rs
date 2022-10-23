@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::rc::Rc;
 use rand::Rng;
 
 mod vec;
@@ -7,12 +8,14 @@ mod hittable;
 mod hittablelist;
 mod sphere;
 mod camera;
+mod material;
 
 use vec::{Vec3, Point3, Color, write_color};
 use ray::Ray;
 use sphere::Sphere;
 use hittablelist::{HittableList};
 use camera::Camera;
+use material::{Lambertian, Metal};
 
 fn ray_color(r: &Ray, world: &HittableList, depth: u64) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
@@ -22,13 +25,19 @@ fn ray_color(r: &Ray, world: &HittableList, depth: u64) -> Color {
 
     if let Some(rec) = world.hit(r, 0.001, f64::INFINITY) {
         let target: Point3 = rec.p + Vec3::random_in_hemisphere(rec.normal);
-        return 0.5 * ray_color(&Ray::new(rec.p, target - rec.p), world, depth-1);
+
+        if let Some((attenuation, scattered)) = rec.mat_ptr.scatter(r, &rec) {
+            attenuation * ray_color(&scattered, world, depth-1)
+        } else {
+            Color::new(0.0, 0.0, 0.0)
+        }
+
+    } else {
+        let unit_direction = r.direction().unit_vector();
+        let t = 0.5 * (unit_direction.y() + 1.0);
+
+        ((1.0 - t) * Color::new(1.0, 1.0, 1.0)) + (t * Color::new(0.5, 0.7, 1.0))
     }
-
-    let unit_direction = r.direction().unit_vector();
-    let t = 0.5 * (unit_direction.y() + 1.0);
-
-    ((1.0 - t) * Color::new(1.0, 1.0, 1.0)) + (t * Color::new(0.5, 0.7, 1.0))
 }
 
 fn main() {
@@ -42,8 +51,21 @@ fn main() {
 
     // World
     let mut world: HittableList = HittableList::new();
-    world.add(Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
-    world.add(Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
+
+    let mat_ground = Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+    let mat_center = Rc::new(Lambertian::new(Color::new(0.7, 0.3, 0.3)));
+    let mat_left = Rc::new(Metal::new(Color::new(0.8, 0.8, 0.8), 0.3));
+    let mat_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 1.0));
+
+    let sphere_ground = Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, mat_ground);
+    let sphere_center = Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, mat_center);
+    let sphere_left = Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, mat_left);
+    let sphere_right = Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, mat_right);
+
+    world.add(Box::new(sphere_ground));
+    world.add(Box::new(sphere_center));
+    world.add(Box::new(sphere_left));
+    world.add(Box::new(sphere_right));
 
     // Camera
     let camera = Camera::new();
