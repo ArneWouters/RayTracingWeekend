@@ -1,7 +1,14 @@
 # Ray Tracing in One Weekend
-This repository contains my rewrite of the code in the [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html) book by Peter Shirley. For now there is only an implementation in Rust.
+This repository contains my rewrite of the code in the [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html) book by Peter Shirley. For now there are implementations in Rust and C++.
 
 # Building and Running
+## C++
+```bash
+cd C++
+./build.sh
+./output > image.ppm
+```
+
 ## Rust
 ```bash
 cd Rust
